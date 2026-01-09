@@ -54,14 +54,16 @@ export default function PageDetail() {
       </div>
 
       {page.coverImage ? (
-          <div className="relative h-64 mt-4">
+          <div className="relative w-full h-[40vh] min-h-[250px] max-h-[500px] mt-4 overflow-hidden">
             <img 
               src={page.coverImage} 
               className="w-full h-full object-cover absolute inset-0" 
               alt={page.title} 
             />
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <div className="ts-header is-huge is-inverted is-center-aligned">{page.title}</div>
+                <div className="ts-header is-huge is-inverted is-center-aligned md:text-5xl text-3xl font-bold px-4">
+                    {page.title}
+                </div>
             </div>
           </div>
       ) : (

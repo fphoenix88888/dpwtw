@@ -29,20 +29,22 @@ export default function Home() {
   return (
     <PublicLayout>
       {/* Hero Section */}
-      <div className="relative">
-        <div className="ts-image is-cover is-16-by-9" style={{ maxHeight: '600px' }}>
-          <img src={heroImg} alt="Hero Banner" className="w-full h-full object-cover" />
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-          <div className="ts-container is-narrow">
-            <div className="text-center text-white p-6">
-                <h1 className="ts-header is-huge is-inverted mb-6" style={{ fontSize: '3.5rem' }}>
+      <div className="relative w-full h-[60vh] min-h-[400px] max-h-[700px] overflow-hidden">
+        <img 
+            src={heroImg} 
+            alt="Hero Banner" 
+            className="w-full h-full object-cover absolute inset-0" 
+        />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60 px-4">
+          <div className="ts-container is-narrow w-full">
+            <div className="text-center text-white">
+                <h1 className="ts-header is-huge is-inverted mb-6 font-bold md:text-5xl text-3xl">
                     {settings?.heroTitle || "歡迎來到 Tocas CMS"}
                 </h1>
-                <p className="ts-text is-large is-inverted mb-8 opacity-90 text-xl">
+                <p className="ts-text is-large is-inverted mb-8 opacity-90 text-lg md:text-xl">
                     {settings?.heroDescription || "探索最新的技術文章與資訊，打造極致的閱讀體驗。"}
                 </p>
-                <div className="flex gap-4 justify-center">
+                <div className="flex gap-4 justify-center flex-wrap">
                     <Link href="/articles" className="ts-button is-primary is-large is-rounded">
                         開始閱讀
                     </Link>

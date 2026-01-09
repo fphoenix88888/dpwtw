@@ -128,7 +128,8 @@
   }
   body {
     font-family: 'Noto Sans TC', sans-serif;
-    background-color: #f7f7f7;
+    background-color: var(--background);
+    color: var(--foreground);
     @apply bg-background text-foreground;
   }
 
@@ -161,5 +162,20 @@
   /* Input focus ring override if possible */
   .ts-input input:focus, .ts-select select:focus, .ts-input textarea:focus {
       border-color: var(--ts-mint-color) !important;
+  }
+
+  /* Fix for Tocas UI dark mode inheritance */
+  .dark {
+      --ts-gray-50: #1a1a1a;
+      --ts-gray-100: #262626;
+      background-color: var(--background);
+      color: var(--foreground);
+  }
+  
+  /* Make sure Tocas components respect dark mode container */
+  .dark .ts-box, .dark .ts-card {
+      background-color: var(--card);
+      color: var(--card-foreground);
+      border-color: var(--border);
   }
 }

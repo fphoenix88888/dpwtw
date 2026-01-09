@@ -9,6 +9,7 @@ export default function Settings() {
   const { register, handleSubmit, reset, setValue, watch } = useForm<SiteSettings>();
   const logoUrl = watch("logoUrl");
   const faviconUrl = watch("faviconUrl");
+  const maintenanceEnabled = watch("maintenance.enabled");
 
   useEffect(() => {
     const settings = db.settings.get();
@@ -91,6 +92,14 @@ export default function Settings() {
                 </div>
                 <div className="column">
                     <div className="ts-field">
+                        <label className="label">每頁文章數量</label>
+                        <div className="ts-input">
+                            <input type="number" {...register("postsPerPage", { valueAsNumber: true })} placeholder="10" />
+                        </div>
+                    </div>
+                </div>
+                <div className="column">
+                    <div className="ts-field">
                         <label className="label">開放使用者註冊</label>
                         <label className="ts-switch">
                             <input type="checkbox" {...register("enableRegistration")} />
@@ -100,44 +109,87 @@ export default function Settings() {
                 </div>
             </div>
 
-            <div className="ts-field">
-                <label className="label">網站 Logo</label>
-                <div className="flex items-center gap-4">
-                    {logoUrl && (
-                        <div className="ts-image is-rounded is-small w-16 h-16 border bg-gray-50 flex items-center justify-center">
-                            <img src={logoUrl} alt="Logo Preview" className="max-w-full max-h-full" />
+            <div className="ts-grid is-2-columns is-relaxed">
+                <div className="column">
+                    <div className="ts-field">
+                        <label className="label">網站 Logo</label>
+                        <div className="flex items-center gap-4">
+                            {logoUrl && (
+                                <div className="ts-image is-rounded is-small w-16 h-16 border bg-gray-50 flex items-center justify-center">
+                                    <img src={logoUrl} alt="Logo Preview" className="max-w-full max-h-full object-contain" />
+                                </div>
+                            )}
+                            <div className="ts-file">
+                                <input type="file" accept="image/*" onChange={handleLogoChange} />
+                            </div>
+                            {logoUrl && (
+                                <button type="button" className="ts-button is-small is-negative is-outlined" onClick={() => setValue("logoUrl", "")}>
+                                    移除
+                                </button>
+                            )}
                         </div>
-                    )}
-                    <div className="ts-file">
-                        <input type="file" accept="image/*" onChange={handleLogoChange} />
                     </div>
-                    {logoUrl && (
-                        <button type="button" className="ts-button is-small is-negative is-outlined" onClick={() => setValue("logoUrl", "")}>
-                            移除
-                        </button>
-                    )}
                 </div>
-                <div className="ts-text is-small is-secondary mt-1">建議尺寸: 120x120px, 最大 500KB</div>
+                <div className="column">
+                    <div className="ts-field">
+                        <label className="label">網站 Favicon</label>
+                        <div className="flex items-center gap-4">
+                            {faviconUrl && (
+                                <div className="ts-image is-rounded is-small w-10 h-10 border bg-gray-50 flex items-center justify-center">
+                                    <img src={faviconUrl} alt="Favicon Preview" className="max-w-full max-h-full object-contain" />
+                                </div>
+                            )}
+                            <div className="ts-file">
+                                <input type="file" accept=".ico,.png,image/*" onChange={handleFaviconChange} />
+                            </div>
+                            {faviconUrl && (
+                                <button type="button" className="ts-button is-small is-negative is-outlined" onClick={() => setValue("faviconUrl", "")}>
+                                    移除
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div className="ts-field">
-                <label className="label">網站 Favicon</label>
-                <div className="flex items-center gap-4">
-                    {faviconUrl && (
-                        <div className="ts-image is-rounded is-small w-10 h-10 border bg-gray-50 flex items-center justify-center">
-                            <img src={faviconUrl} alt="Favicon Preview" className="max-w-full max-h-full" />
-                        </div>
-                    )}
-                    <div className="ts-file">
-                        <input type="file" accept=".ico,.png,image/*" onChange={handleFaviconChange} />
-                    </div>
-                    {faviconUrl && (
-                        <button type="button" className="ts-button is-small is-negative is-outlined" onClick={() => setValue("faviconUrl", "")}>
-                            移除
-                        </button>
-                    )}
+            <div className="ts-divider is-section"></div>
+
+            {/* Maintenance Mode */}
+            <div className="ts-header is-heavy is-big">維護模式</div>
+            <div className="ts-segment is-secondary">
+                <div className="ts-field mb-4">
+                    <label className="ts-switch">
+                        <input type="checkbox" {...register("maintenance.enabled")} />
+                        <span className="label">開啟維護模式 (前台將無法訪問)</span>
+                    </label>
                 </div>
-                <div className="ts-text is-small is-secondary mt-1">建議尺寸: 32x32px, .ico 或 .png 格式, 最大 100KB</div>
+                
+                <div className={`space-y-4 ${!maintenanceEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="ts-field">
+                        <label className="label">維護原因</label>
+                        <div className="ts-input">
+                            <input type="text" {...register("maintenance.reason")} placeholder="網站進行例行性維護，請稍後再試。" />
+                        </div>
+                    </div>
+                    <div className="ts-grid is-2-columns">
+                        <div className="column">
+                            <div className="ts-field">
+                                <label className="label">開始時間 (選填)</label>
+                                <div className="ts-input">
+                                    <input type="datetime-local" {...register("maintenance.startTime")} />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="column">
+                            <div className="ts-field">
+                                <label className="label">結束時間 (選填)</label>
+                                <div className="ts-input">
+                                    <input type="datetime-local" {...register("maintenance.endTime")} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="ts-divider is-section"></div>

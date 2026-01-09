@@ -25,12 +25,6 @@ export function ThemeProvider({
   defaultTheme = "auto",
   storageKey = "vite-ui-theme",
 }: ThemeProviderProps) {
-  // We prioritize DB settings over local storage key for site-wide consistency managed by admin
-  // But strictly speaking, theme is often a per-user preference.
-  // The requirement says "admin can switch theme in settings", implying site-wide setting?
-  // "在後台新增 1. 主題切換（包含明/暗/自動）" -> This sounds like a site-wide config in admin settings.
-  // However, usually theme is client-side. I will sync state with DB settings.
-  
   const [theme, setThemeState] = useState<ThemeMode>(defaultTheme);
 
   useEffect(() => {
@@ -52,6 +46,8 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
+    // Remove Tocas data attribute to reset
+    root.removeAttribute("data-theme");
 
     if (theme === "auto") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
@@ -60,18 +56,18 @@ export function ThemeProvider({
         : "light";
 
       root.classList.add(systemTheme);
+      // Tocas might use auto detection, but explicit class helps Tailwind.
+      // For Tocas to sync if it relies on data-theme:
+      root.setAttribute("data-theme", systemTheme);
       return;
     }
 
     root.classList.add(theme);
+    root.setAttribute("data-theme", theme);
   }, [theme]);
 
   const setTheme = (theme: ThemeMode) => {
     setThemeState(theme);
-    // Also update DB if we want this to be persistent site-wide
-    // But since the requirement is "In Admin Settings", we assume the admin changes it there via DB update.
-    // If we use this hook in a toggle button, we might want to update DB too?
-    // For now, let's keep setThemeState internal and let Settings page handle DB update.
   };
 
   return (
