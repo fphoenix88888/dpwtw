@@ -7,18 +7,75 @@ import MDEditor from '@uiw/react-md-editor';
 import Breadcrumb from "@/components/Breadcrumb";
 
 export default function PageDetail() {
-  const [match, params] = useRoute("/p/:slug");
+  const [match, params] = useRoute<any>("/p/:path*");
   const [page, setPage] = useState<Page | null>(null);
+  const [breadcrumbs, setBreadcrumbs] = useState<{ label: string; href?: string; active?: boolean }[]>([]);
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (params?.slug) {
-      const data = db.pages.getBySlug(params.slug);
-      if (data && data.status === 'published') {
-        setPage(data);
+    if (params?.path) {
+      // Decode path segments
+      const segments = params.path.split("/").map(s => decodeURIComponent(s));
+      const currentSlug = segments[segments.length - 1];
+
+      const allPages = db.pages.getAll();
+      // Find candidate pages with the matching slug
+      const candidate = allPages.find(p => p.slug === currentSlug && p.status === 'published');
+
+      if (candidate) {
+          // Verify path hierarchy
+          let isValidPath = true;
+          let current: Page | undefined = candidate;
+          const pathCheck: string[] = [];
+
+          // Trace back from candidate to root
+          // This creates a chain: [child, parent, grandparent]
+          // We need to match this against segments [grandparent, parent, child]
+          const chain: Page[] = [];
+          
+          while (current) {
+              chain.unshift(current);
+              if (current.parentId) {
+                  current = allPages.find(p => p.id === current?.parentId);
+                  // If parent id exists but page not found, broken chain
+                  if (!current) {
+                      isValidPath = false;
+                      break;
+                  }
+              } else {
+                  current = undefined;
+              }
+          }
+
+          // Check if chain slugs match URL segments
+          if (isValidPath && chain.length === segments.length) {
+              for (let i = 0; i < chain.length; i++) {
+                  if (chain[i].slug !== segments[i]) {
+                      isValidPath = false;
+                      break;
+                  }
+              }
+          } else {
+              isValidPath = false;
+          }
+
+          if (isValidPath) {
+              setPage(candidate);
+              
+              // Build breadcrumbs
+              const crumbs = [
+                  { label: "首頁", href: "/" },
+                  ...chain.map((p, index) => ({
+                      label: p.title,
+                      href: index === chain.length - 1 ? undefined : `/p/${chain.slice(0, index + 1).map(c => c.slug).join('/')}`,
+                      active: index === chain.length - 1
+                  }))
+              ];
+              setBreadcrumbs(crumbs);
+          } else {
+              setPage(null);
+          }
       } else {
-        // Redirect to 404 or home if not found
-        // For now, let's just show not found state in render
         setPage(null);
       }
     }
@@ -39,13 +96,6 @@ export default function PageDetail() {
 
   // Check if content looks like HTML (starts with <)
   const isHtml = page.content.trim().startsWith('<');
-  const parentPage = page?.parentId ? db.pages.getById(page.parentId) : null;
-  
-  const breadcrumbs = [
-      { label: "首頁", href: "/" },
-      ...(parentPage ? [{ label: parentPage.title, href: `/p/${parentPage.slug}` }] : []),
-      { label: page?.title || "", active: true }
-  ];
 
   return (
     <PublicLayout>
@@ -54,16 +104,14 @@ export default function PageDetail() {
       </div>
 
       {page.coverImage ? (
-          <div className="relative w-full h-[40vh] min-h-[250px] max-h-[500px] mt-4 overflow-hidden">
+          <div className="relative h-64 mt-4">
             <img 
               src={page.coverImage} 
               className="w-full h-full object-cover absolute inset-0" 
               alt={page.title} 
             />
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <div className="ts-header is-huge is-inverted is-center-aligned md:text-5xl text-3xl font-bold px-4">
-                    {page.title}
-                </div>
+                <div className="ts-header is-huge is-inverted is-center-aligned">{page.title}</div>
             </div>
           </div>
       ) : (

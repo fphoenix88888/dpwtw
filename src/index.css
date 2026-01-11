@@ -44,9 +44,10 @@
 :root {
   --radius: 0.625rem;
   
-  /* Mint Green Theme (#10b981 approx) */
+  /* Mint Green Theme */
   --mint-primary: oklch(0.72 0.16 160);
   
+  /* Light Mode Colors */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -54,7 +55,6 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   
-  /* Set Primary to Mint */
   --primary: var(--mint-primary);
   --primary-foreground: oklch(1 0 0);
   
@@ -69,11 +69,7 @@
   --input: oklch(0.922 0 0);
   --ring: var(--mint-primary);
   
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  /* Sidebar */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: var(--mint-primary);
@@ -82,9 +78,15 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: var(--mint-primary);
+
+  /* Tocas UI Light Overrides */
+  --ts-gray-100: #f7f7f7;
+  --ts-gray-800: #1f2937;
+  --ts-text-primary: #1f2937;
 }
 
 .dark {
+  /* Dark Mode Colors */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -92,7 +94,6 @@
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
   
-  /* Mint in Dark Mode */
   --primary: var(--mint-primary);
   --primary-foreground: oklch(0.145 0 0);
   
@@ -107,11 +108,7 @@
   --input: oklch(1 0 0 / 15%);
   --ring: var(--mint-primary);
   
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  /* Sidebar Dark */
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: var(--mint-primary);
@@ -120,6 +117,15 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: var(--mint-primary);
+
+  /* Tocas UI Dark Overrides */
+  --ts-gray-50: #1a1a1a;
+  --ts-gray-100: #262626;
+  --ts-gray-200: #333333;
+  --ts-gray-800: #e5e7eb;
+  --ts-gray-900: #f3f4f6;
+  --ts-text-primary: #f3f4f6;
+  --ts-text-secondary: #9ca3af;
 }
 
 @layer base {
@@ -130,10 +136,11 @@
     font-family: 'Noto Sans TC', sans-serif;
     background-color: var(--background);
     color: var(--foreground);
+    transition: background-color 0.2s ease, color 0.2s ease;
     @apply bg-background text-foreground;
   }
 
-  /* Tocas UI Theme Overrides for Mint Green (#10b981) */
+  /* Mint Green Theme Integration */
   :root {
       --ts-mint-color: #10b981;
       --ts-mint-darker: #059669;
@@ -153,29 +160,42 @@
       color: var(--ts-mint-color) !important;
   }
   
-  /* Link active state in navbar */
   .ts-tab .item.is-active {
       border-bottom-color: var(--ts-mint-color) !important;
       color: var(--ts-mint-color) !important;
   }
   
-  /* Input focus ring override if possible */
   .ts-input input:focus, .ts-select select:focus, .ts-input textarea:focus {
       border-color: var(--ts-mint-color) !important;
   }
 
-  /* Fix for Tocas UI dark mode inheritance */
-  .dark {
-      --ts-gray-50: #1a1a1a;
-      --ts-gray-100: #262626;
-      background-color: var(--background);
+  /* Dark Mode Compatibility for Tocas Components */
+  .dark .ts-box, 
+  .dark .ts-card, 
+  .dark .ts-content,
+  .dark .ts-modal,
+  .dark .ts-menu {
+      background-color: var(--card);
+      color: var(--foreground);
+      border-color: var(--border);
+  }
+
+  .dark .ts-header {
       color: var(--foreground);
   }
   
-  /* Make sure Tocas components respect dark mode container */
-  .dark .ts-box, .dark .ts-card {
-      background-color: var(--card);
-      color: var(--card-foreground);
-      border-color: var(--border);
+  .dark .ts-text.is-secondary {
+      color: var(--muted-foreground);
+  }
+
+  /* Ensure dropdown menus in dark mode are visible */
+  .dark .ts-menu {
+      background: var(--popover);
+      color: var(--popover-foreground);
+  }
+  
+  .dark .ts-menu .item:hover {
+      background: var(--accent);
+      color: var(--accent-foreground);
   }
 }

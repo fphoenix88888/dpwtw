@@ -35,20 +35,19 @@ export default function Home() {
             alt="Hero Banner" 
             className="w-full h-full object-cover absolute inset-0" 
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-black/60 px-4">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 px-4 text-center">
           <div className="ts-container is-narrow w-full">
-            <div className="text-center text-white">
-                <h1 className="ts-header is-huge is-inverted mb-6 font-bold md:text-5xl text-3xl">
+            <div className="text-white">
+                <h1 className="ts-header is-huge is-inverted is-center-aligned mb-6 font-bold md:text-5xl text-3xl">
                     {settings?.heroTitle || "歡迎來到 Tocas CMS"}
                 </h1>
-                <p className="ts-text is-large is-inverted mb-8 opacity-90 text-lg md:text-xl">
+                <p className="ts-text is-large is-inverted is-center-aligned mb-8 opacity-90 text-lg md:text-xl">
                     {settings?.heroDescription || "探索最新的技術文章與資訊，打造極致的閱讀體驗。"}
                 </p>
                 <div className="flex gap-4 justify-center flex-wrap">
                     <Link href="/articles" className="ts-button is-primary is-large is-rounded">
                         開始閱讀
                     </Link>
-                    {/* <Link href="/admin/login" ...> Admin Login Hidden </Link> */}
                 </div>
             </div>
           </div>
@@ -156,8 +155,8 @@ export default function Home() {
       {/* CTA Section */}
       <div className="ts-section is-primary is-inverted">
           <div className="ts-container is-narrow section-padding py-20 text-center">
-              <h2 className="ts-header is-huge is-inverted mb-6">準備好開始您的旅程了嗎？</h2>
-              <p className="ts-text is-large is-inverted opacity-90 mb-10 max-w-2xl mx-auto">
+              <h2 className="ts-header is-huge is-inverted is-center-aligned mb-6">準備好開始您的旅程了嗎？</h2>
+              <p className="ts-text is-large is-inverted is-center-aligned opacity-90 mb-10 max-w-2xl mx-auto">
                   無論您是開發者、設計師還是內容創作者，Tocas CMS 都能為您提供所需的工具。立即加入我們，開始打造您的專屬網站。
               </p>
               <div className="flex gap-4 justify-center">

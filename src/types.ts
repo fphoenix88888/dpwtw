@@ -28,7 +28,8 @@ export interface Page {
   content: string;
   status: 'draft' | 'published';
   parentId?: string;
-  coverImage?: string; // New: Background/Cover image
+  coverImage?: string;
+  order?: number; // New field
   updatedAt: string;
 }
 
@@ -45,9 +46,9 @@ export interface Event {
 export interface Media {
   id: string;
   name: string;
-  type: string; // mime type
-  size: number; // bytes
-  data: string; // base64
+  type: string;
+  size: number;
+  data: string;
   createdAt: string;
 }
 

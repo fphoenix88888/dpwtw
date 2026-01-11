@@ -121,7 +121,7 @@ function AppRouter() {
         <Route path="/" component={Home} />
         <Route path="/articles" component={ArticleList} />
         <Route path="/articles/:id" component={ArticleDetail} />
-        <Route path="/p/:slug" component={PageDetail} />
+        <Route path="/p/:path*" component={PageDetail} />
         <Route path="/events" component={Events} />
         <Route path="/sitemap" component={Sitemap} />
         

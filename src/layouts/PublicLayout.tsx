@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { db } from "@/services/db";
 import type { Page, SiteSettings } from "@/types";
 
@@ -8,15 +8,27 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [pages, setPages] = useState<Page[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const navRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Fetch published pages for navigation
     const allPages = db.pages.getAll();
     setPages(allPages.filter(p => p.status === 'published'));
-    
-    // Fetch site settings
     setSettings(db.settings.get());
+
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const toggleDropdown = (id: string) => {
+    setActiveDropdown(activeDropdown === id ? null : id);
+  };
 
   const footerStyle = {
       backgroundColor: settings?.footerBackgroundColor,
@@ -29,46 +41,32 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 
   const footerLinkClass = settings?.footerTextColor ? "hover:opacity-80 transition-opacity" : "ts-text is-secondary hover:text-primary transition-colors";
 
-  // Navigation Logic
+  const rootPages = pages.filter(p => !p.parentId);
+  const getSubPages = (parentId: string) => pages.filter(p => p.parentId === parentId);
+
+  // Navigation Items
   const getNavItems = () => {
       const items: any[] = [];
-      
-      // 1. Home
       items.push({ id: 'home', title: '首頁', href: '/', order: 0 });
 
-      // 2. Dynamic Pages & Fixed Features
-      // We assign weights to order them:
-      // Home: 0
-      // Services: 20
-      // Events: 25 (Right of Services)
-      // Blog: 90 (Left of Contact)
-      // Contact: 100
-      // Others: 50
-
-      const rootPages = pages.filter(p => !p.parentId);
-      
       rootPages.forEach(page => {
-          let order = 50; // Default
+          let order = 50;
           if (page.slug === 'services') order = 20;
           if (page.slug === 'contact') order = 100;
           if (page.slug === 'about') order = 10;
           
-          // Check children
           const subPages = pages.filter(p => p.parentId === page.id);
           
           items.push({
               id: page.id,
               title: page.title,
-              href: `/p/${page.slug}`,
+              href: `/p/${page.slug}`, // Will be updated in next task
               order,
               subPages: subPages.length > 0 ? subPages : undefined
           });
       });
 
-      // Events (Right of Services -> 25)
       items.push({ id: 'events', title: '活動日曆', href: '/events', order: 25 });
-
-      // Blog (Left of Contact -> 90)
       items.push({ id: 'blog', title: '站長日誌', href: '/articles', order: 90 });
 
       return items.sort((a, b) => a.order - b.order);
@@ -90,14 +88,24 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                 <span>{settings?.siteName || "My Tocas Site"}</span>
               </Link>
             </div>
-            <div className="column">
+            <div className="column" ref={navRef}>
               <nav className="ts-tab">
                 {navItems.map(item => {
                     if (item.subPages) {
+                        const isActive = activeDropdown === item.id;
                         return (
-                            <div key={item.id} className="item is-dropdown">
-                                <div className="text">{item.title}</div>
-                                <div className="menu">
+                            <div 
+                                key={item.id} 
+                                className={`item is-dropdown ${isActive ? 'is-active' : ''}`}
+                                onMouseEnter={() => setActiveDropdown(item.id)}
+                                onMouseLeave={() => setActiveDropdown(null)}
+                                onClick={() => toggleDropdown(item.id)}
+                            >
+                                <div className="text">
+                                    {item.title}
+                                    <span className="ts-icon is-angle-down-icon ml-1 is-tiny"></span>
+                                </div>
+                                <div className="menu" style={{ display: isActive ? 'block' : 'none', position: 'absolute', zIndex: 100 }}>
                                     <Link href={item.href} className="item">
                                         {item.title} (主頁)
                                     </Link>
@@ -138,8 +146,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       >
         <div className="ts-container section-padding py-12">
           <div className="ts-grid is-3-columns is-relaxed is-stackable">
-              
-              {/* Column 1: Brand & Description */}
+              {/* Footer columns same as before */}
               <div className="column">
                   <div className="ts-header is-heavy is-big mb-4" style={footerHeaderStyle}>
                       {settings?.siteName || "My Tocas Site"}
@@ -148,30 +155,14 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                       {settings?.footerDescription || "這是一個基於 Tocas UI 建置的範例網站。"}
                   </p>
                   <div className="ts-buttons is-icon is-secondary is-dense">
-                      {settings?.socialLinks?.facebook && (
-                          <a href={settings.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="ts-button">
-                              <span className="ts-icon fa-brands fa-facebook"></span>
-                          </a>
-                      )}
-                      {settings?.socialLinks?.twitter && (
-                          <a href={settings.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="ts-button">
-                              <span className="ts-icon fa-brands fa-twitter"></span>
-                          </a>
-                      )}
-                      {settings?.socialLinks?.instagram && (
-                          <a href={settings.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="ts-button">
-                              <span className="ts-icon fa-brands fa-instagram"></span>
-                          </a>
-                      )}
-                      {settings?.socialLinks?.github && (
-                          <a href={settings.socialLinks.github} target="_blank" rel="noopener noreferrer" className="ts-button">
-                              <span className="ts-icon fa-brands fa-github"></span>
-                          </a>
-                      )}
+                      {/* Social Links */}
+                      {settings?.socialLinks?.facebook && <a href={settings.socialLinks.facebook} target="_blank" className="ts-button"><span className="ts-icon fa-brands fa-facebook"></span></a>}
+                      {settings?.socialLinks?.twitter && <a href={settings.socialLinks.twitter} target="_blank" className="ts-button"><span className="ts-icon fa-brands fa-twitter"></span></a>}
+                      {settings?.socialLinks?.instagram && <a href={settings.socialLinks.instagram} target="_blank" className="ts-button"><span className="ts-icon fa-brands fa-instagram"></span></a>}
+                      {settings?.socialLinks?.github && <a href={settings.socialLinks.github} target="_blank" className="ts-button"><span className="ts-icon fa-brands fa-github"></span></a>}
                   </div>
               </div>
 
-              {/* Column 2: Quick Links */}
               <div className="column">
                   <div className="ts-header is-heavy mb-4" style={footerHeaderStyle}>快速連結</div>
                   <div className="flex flex-col gap-2">
@@ -181,11 +172,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                               {item.title}
                           </Link>
                       ))}
-                      <Link href="/sitemap" className={footerLinkClass}>網站導覽</Link>
                   </div>
               </div>
 
-              {/* Column 3: Contact Info */}
               <div className="column">
                   <div className="ts-header is-heavy mb-4" style={footerHeaderStyle}>聯絡資訊</div>
                   <div className={`flex flex-col gap-3 ${!settings?.footerTextColor ? 'text-gray-500' : ''}`}>
